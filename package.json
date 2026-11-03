@@ -1,20 +1,18 @@
 {
-  "name": "webrtc-e2ee",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "private-meet",
+  "version": "2.0.0",
+  "description": "Self-hosted group video meetings with end-to-end encrypted media. Peer-to-peer, no accounts, no build step.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "main": "server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test test/crypto.test.js test/server.test.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "crypto": "^1.0.1",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
-    "libsodium-wrappers": "^0.7.15",
-    "socket.io": "^4.8.1",
-    "tweetnacl": "^1.0.3"
+    "ws": "^8.18.0"
   }
 }

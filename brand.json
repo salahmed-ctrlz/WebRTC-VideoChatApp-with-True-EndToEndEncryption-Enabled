@@ -1,0 +1,12 @@
+{
+  "name": "Private Meet",
+  "tagline": "Video meetings that only the people in them can see.",
+  "logo": null,
+  "accent": "#2f9e6f",
+  "theme": "system",
+  "links": [],
+  "credit": { "text": "salaheddinemedkour.me", "url": "https://salaheddinemedkour.me" },
+  "features": { "chat": true, "screenShare": true, "raiseHand": true },
+  "requireFrameEncryption": true,
+  "strings": {}
+}
