@@ -8,6 +8,7 @@ self.onrtctransform = (event) => {
   const { operation, key, kind, peerId } = transformer.options;
   const stats = { encrypted: 0, decrypted: 0, dropped: 0 };
   let lastReport = 0;
+
   const report = () => {
     const now = Date.now();
     if (now - lastReport < 1000) return;
@@ -16,27 +17,32 @@ self.onrtctransform = (event) => {
   };
 
   const transform = async (frame, controller) => {
-    const bytes = new Uint8Array(frame.data);
-    // `type` is undefined for audio frames; for video it is 'key' or 'delta'.
-    const frameType = frame.type;
-    if (operation === 'encrypt') {
-      frame.data = (await encryptFrame(key, bytes, kind, frameType)).buffer;
-      stats.encrypted++;
-      controller.enqueue(frame);
-    } else {
-      const plain = await decryptFrame(key, bytes, kind, frameType);
-      if (!plain) {
-        // Wrong key, tampered or unencrypted frame: never hand it to the decoder.
-        stats.dropped++;
-        report();
-        return;
+    try {
+      const bytes = new Uint8Array(frame.data);
+      // `type` is undefined for audio frames; for video it is 'key' or 'delta'.
+      if (operation === 'encrypt') {
+        frame.data = (await encryptFrame(key, bytes, kind, frame.type)).buffer;
+        stats.encrypted++;
+        controller.enqueue(frame);
+      } else {
+        const plain = await decryptFrame(key, bytes, kind, frame.type);
+        if (plain) {
+          frame.data = plain.buffer;
+          stats.decrypted++;
+          controller.enqueue(frame);
+        } else {
+          // Wrong key, tampered or unencrypted frame: never hand it to the decoder.
+          stats.dropped++;
+        }
       }
-      frame.data = plain.buffer;
-      stats.decrypted++;
-      controller.enqueue(frame);
+    } catch {
+      stats.dropped++; // never let one bad frame take down the stream
     }
     report();
   };
 
-  transformer.readable.pipeThrough(new TransformStream({ transform })).pipeTo(transformer.writable);
+  transformer.readable
+    .pipeThrough(new TransformStream({ transform }))
+    .pipeTo(transformer.writable)
+    .catch(() => {});
 };
