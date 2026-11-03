@@ -46,6 +46,8 @@ export function lobby(root, app) {
     camBtn.setAttribute('aria-label', camOn ? t('cameraOffAction') : t('cameraOn'));
     camBtn.setAttribute('aria-pressed', String(!camOn));
     avatar.hidden = !!(video && camOn);
+    micBtn.disabled = !audio;
+    camBtn.disabled = !video;
     if (audio) audio.enabled = micOn;
     if (video) video.enabled = camOn;
   }

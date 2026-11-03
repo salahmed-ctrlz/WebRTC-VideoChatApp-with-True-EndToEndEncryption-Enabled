@@ -157,6 +157,7 @@ select:disabled { opacity: .6; }
   transition: background-color .15s, border-color .15s;
 }
 .ctl:hover { background: var(--surface-2); }
+.ctl:disabled { opacity: .45; cursor: not-allowed; }
 .ctl.off { background: var(--danger); border-color: var(--danger); color: #fff; }
 .ctl.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .ctl.leave { background: var(--danger); border-color: var(--danger); color: #fff; }
