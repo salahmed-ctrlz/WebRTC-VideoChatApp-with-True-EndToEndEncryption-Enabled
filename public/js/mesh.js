@@ -5,7 +5,9 @@ export const e2eeSupported = typeof RTCRtpScriptTransform !== 'undefined' && typ
 const MAX_NAME = 40;
 const MAX_CHAT = 2000;
 
-const clean = (v, max) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, max) : '');
+// Strip control and bidirectional-override characters so names can't spoof or reorder text.
+const clean = (v, max) =>
+  typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '').trim().slice(0, max) : '';
 
 /**
  * Full mesh of RTCPeerConnections. Every signalling message (offers, answers, ICE candidates,

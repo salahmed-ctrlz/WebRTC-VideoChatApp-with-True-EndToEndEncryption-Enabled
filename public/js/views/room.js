@@ -5,8 +5,6 @@ import { Mesh } from '../mesh.js';
 import { formatMeetingHash } from '../crypto.js';
 import { getLocalMedia, getScreen, listDevices, canShareScreen, canPickSpeaker, watchLevel } from '../media.js';
 
-const GAP = 8;
-
 export function room(root, app, session) {
   const { meeting, keys, config, brand } = app;
   const features = brand.features;
@@ -375,20 +373,23 @@ export function room(root, app, session) {
     if (panel === 'people') paintPeople();
   }
 
-  // Pick the column count that gives the largest tiles for the space available.
+  // Pick the column count that gives the largest tiles for the space actually available.
   function fit(n, spotlight) {
     if (spotlight || n === 0) return;
-    const W = stage.clientWidth;
-    const H = stage.clientHeight;
-    if (!W || !H) return;
+    const cs = getComputedStyle(stage);
+    const gap = parseFloat(cs.columnGap) || 0;
+    const W = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const H = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    if (W <= 0 || H <= 0) return;
     const ratio = W >= H ? 16 / 9 : 3 / 4;
     let best = { w: 0 };
     for (let cols = 1; cols <= n; cols++) {
       const rows = Math.ceil(n / cols);
-      const w = Math.min((W - GAP * (cols - 1)) / cols, ((H - GAP * (rows - 1)) / rows) * ratio);
+      const w = Math.min((W - gap * (cols - 1)) / cols, ((H - gap * (rows - 1)) / rows) * ratio);
       if (w > best.w) best = { w, cols };
     }
-    stage.style.setProperty('--tw', `${Math.floor(best.w)}px`);
+    // Round down and leave a pixel of slack so sub-pixel rounding never wraps a row early.
+    stage.style.setProperty('--tw', `${Math.max(48, Math.floor(best.w) - 1)}px`);
     stage.style.setProperty('--ratio', String(ratio));
   }
   const ro = new ResizeObserver(() => render());

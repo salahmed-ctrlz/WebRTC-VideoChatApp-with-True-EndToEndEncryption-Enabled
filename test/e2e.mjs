@@ -143,6 +143,14 @@ try {
     await ana.page.screenshot({ path: `${SHOTS}/room-grid.png` });
   }
 
+  // The signalling connection dies (server restart, flaky network): everyone reconnects and the mesh re-forms.
+  for (const ws of app.signaling.wss.clients) ws.terminate();
+  await ana.page.waitForSelector('.conn-banner', { state: 'visible', timeout: 10000 });
+  await ana.page.waitForSelector('.conn-banner', { state: 'hidden', timeout: 30000 });
+  for (const p of [ana, ben, cy]) await playing(p.page, 2);
+  await ana.page.waitForSelector('.tile:has-text("Ben") .badge-ico.off', { timeout: 20000 });
+  console.log('ok  after a dropped connection the meeting recovers on its own (mute state kept)');
+
   // Someone with the room id but the wrong key can't see or be seen, and can't read anything.
   const wrong = link.replace(/\.[A-Za-z0-9_-]{43}$/, '.' + 'A'.repeat(43));
   const eve = await person('Eve', { url: wrong });
